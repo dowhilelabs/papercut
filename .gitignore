@@ -1,2 +1,4 @@
 # Rust build artifacts
 /target
+# Local papercut journal (per-machine; do not commit)
+.papercuts.jsonl

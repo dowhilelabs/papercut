@@ -9,7 +9,7 @@ Capture small friction in the moment without derailing the current task. These
 are distinct from your task log (what you accomplished) and from real bug
 tracking (reproducible bugs / tracked work). The
 `papercut` CLI appends to `.papercuts.jsonl` at the repo root, so complaints
-show up in git diffs and accumulate into a backlog that gets fixed periodically.
+accumulate into a local, per-machine backlog that gets fixed periodically.
 
 ## The two-question test
 

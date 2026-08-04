@@ -3,7 +3,8 @@
 A tiny CLI that gives anyone — human or AI agent — a complaint box for a repo.
 When you hit friction (a dead-end tool call, a broken link, a footgun config, a
 missing helper), file it in one line instead of silently pushing through. The
-backlog lives in the repo and shows up in git, so it's easy to review and fix.
+backlog lives in `.papercuts.jsonl` at your repo root, local to your machine and
+easily reviewed and fixed.
 
 ## Quickstart
 
@@ -59,8 +60,9 @@ append-only — `resolve` adds an event, it never rewrites history.
 ## Where papercuts live
 
 `.papercuts.jsonl` at your repo root (falls back to `~/.papercuts/log.jsonl`
-outside a git repo). It's plain, append-only JSONL — human-readable,
-git-diffable, and it travels with the repo. No server, no sync, no telemetry.
+outside a git repo). It's plain, append-only JSONL — human-readable and local
+to your machine (gitignored, so it stays yours; it doesn't get committed or
+shared). No server, no sync, no telemetry.
 
 ## For your AI agents
 
