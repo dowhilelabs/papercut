@@ -23,7 +23,8 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// File a papercut complaint (alias: `papercut log`).
+    /// File a papercut complaint. Default subcommand: `papercut -m <model> "message"`.
+    #[command(visible_alias = "log")]
     Add(AddArgs),
     /// List papercuts, severity-first then newest. Defaults to a human-readable
     /// table; `--format json` for machine parsing, `md` for markdown.
@@ -47,8 +48,8 @@ pub struct AddArgs {
     /// Severity: minor | major | blocker.
     #[arg(long, default_value = "minor")]
     pub severity: String,
-    /// Override the detected model.
-    #[arg(long)]
+    /// Override the detected model (e.g. `-m claude-sonnet-4-5`).
+    #[arg(short = 'm', long)]
     pub model: Option<String>,
     /// Override the detected harness.
     #[arg(long)]

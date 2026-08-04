@@ -6,22 +6,45 @@ mod record;
 mod schema;
 mod store;
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use cli::{Cli, Command};
 use error::Error;
 use jiff::Timestamp;
 use record::{Cut, Record, Resolved, Severity, make_cut_id};
 use std::collections::HashSet;
+use std::ffi::OsString;
 use std::io::Read;
 use std::str::FromStr;
 
 fn main() {
-    let cli = Cli::parse();
+    let args = implicit_add_args();
+    let cli = Cli::parse_from(args);
     let code = match dispatch(cli.command) {
         Ok(code) => code,
         Err(e) => e.print_exit(),
     };
     std::process::exit(code);
+}
+
+/// Make `add` the default subcommand: `papercut -m gpt-5 "msg"` behaves exactly
+/// like `papercut add -m gpt-5 "msg"`. Rewrites argv to inject `add` whenever the
+/// first token is neither a known subcommand nor a help/version flag.
+fn implicit_add_args() -> Vec<OsString> {
+    let mut args: Vec<OsString> = std::env::args_os().collect();
+    // Bare `papercut` (no args) prints help and exits 0.
+    if args.len() == 1 {
+        let _ = Cli::command().print_help();
+        std::process::exit(0);
+    }
+    let first = args[1].to_str().unwrap_or("");
+    const KNOWN: &[&str] = &[
+        "add", "list", "resolve", "schema", "doctor", "log", "help",
+        "-h", "--help", "-V", "--version",
+    ];
+    if !KNOWN.contains(&first) {
+        args.insert(1, OsString::from("add"));
+    }
+    args
 }
 
 fn dispatch(cmd: Command) -> Result<i32, Error> {

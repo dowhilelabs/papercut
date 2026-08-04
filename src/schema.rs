@@ -26,12 +26,13 @@ pub fn contract() -> Value {
         "commands": {
             "add": {
                 "alias": "log",
+                "default": "implicit when the first arg is a message or a flag (-m/--model)",
                 "write": true,
                 "args": {
                     "text": "positional; '-' or omitted reads stdin",
                     "--tag/-t": "repeatable area tag",
                     "--severity": "minor | major | blocker (default minor)",
-                    "--model/--harness/--user": "override detected context"
+                    "-m/--model, --harness, --user": "override detected context"
                 },
                 "exit": { "0": "appended", "no-op": "duplicate suppressed (first-wins)" }
             },

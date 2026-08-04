@@ -92,6 +92,38 @@ fn add_rejects_empty_body() {
 }
 
 #[test]
+fn add_is_implicit_default_subcommand() {
+    let dir = tempdir().unwrap();
+    // `papercut "msg"` — no subcommand; message is the first positional.
+    let out = pc(dir.path()).arg("bare message").output().unwrap();
+    assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
+    let v = json_of(&String::from_utf8(out.stdout).unwrap());
+    assert_eq!(v["data"]["record"]["text"], "bare message");
+}
+
+#[test]
+fn short_model_flag_overrides_detection() {
+    let dir = tempdir().unwrap();
+    // `papercut -m gpt-5 "msg"` — implicit add with a model override.
+    let out = pc(dir.path())
+        .args(["-m", "gpt-5", "footgun via -m"])
+        .output()
+        .unwrap();
+    assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
+    let v = json_of(&String::from_utf8(out.stdout).unwrap());
+    assert_eq!(v["data"]["record"]["model"], "gpt-5");
+}
+
+#[test]
+fn bare_invocation_prints_help() {
+    let dir = tempdir().unwrap();
+    let out = pc(dir.path()).output().unwrap();
+    assert_eq!(out.status.code(), Some(0));
+    let stdout = String::from_utf8(out.stdout).unwrap();
+    assert!(stdout.contains("Usage: papercut"), "{stdout}");
+}
+
+#[test]
 fn list_returns_open_cuts_json() {
     let dir = tempdir().unwrap();
     pc(dir.path())

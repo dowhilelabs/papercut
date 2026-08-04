@@ -13,7 +13,8 @@ brew tap dowhilelabs/papercut https://github.com/dowhilelabs/papercut
 brew install papercut
 
 # 2. File a papercut — what got in the way + what would have prevented it
-papercut add "yarn web:test with a root-relative path finds no files; the workspace test cwd is apps/web" --tag tooling
+#    (add is the default subcommand; `-m` records the model explicitly)
+papercut "yarn web:test with a root-relative path finds no files; the workspace test cwd is apps/web" --tag tooling
 
 # 3. Review the backlog (severity-first)
 papercut list
@@ -38,15 +39,17 @@ Or, from source: `cargo install --path .`
 ## Usage
 
 ```bash
-papercut add "text"            # file a papercut (also: papercut log)
-papercut add -                 # file from stdin (good for long bodies)
-papercut list                  # human-readable, open items first
-papercut list --format md      # markdown digest
-papercut list --format json    # machine/agent JSON
-papercut list --all            # include resolved items
-papercut resolve pc_9f2c41d0   # mark one fixed (full or prefix id)
-papercut doctor                # validate the journal
-papercut schema                # full machine contract (mainly for agents)
+papercut "text"                  # file a papercut (add is the default subcommand)
+papercut -m gpt-5 "text"         # ... with the model recorded explicitly
+papercut add "text"              # explicit subcommand (also: papercut log)
+papercut add -                   # file from stdin (good for long bodies)
+papercut list                    # human-readable, open items first
+papercut list --format md        # markdown digest
+papercut list --format json      # machine/agent JSON
+papercut list --all              # include resolved items
+papercut resolve pc_9f2c41d0     # mark one fixed (full or prefix id)
+papercut doctor                  # validate the journal
+papercut schema                  # full machine contract (mainly for agents)
 ```
 
 Each entry records **who** (git identity), **what** (model/harness, when filed
@@ -71,7 +74,7 @@ When you hit small friction while working — a tool call that missed and had to
 be retried, a confusing or undocumented setup step, a flaky command, a stale
 cache, a misleading error, a non-obvious gotcha — file it in the moment:
 
-    papercut add "<what you were doing → what got in the way>" --tag <area>
+    papercut "<what you were doing → what got in the way>" --tag <area>
 
 One or two sentences: what you were doing → what got in the way (a guess at the
 cause or fix is a bonus). Do this proactively, even though none of it is
