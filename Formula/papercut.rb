@@ -4,7 +4,7 @@ class Papercut < Formula
   version "0.1.0"
   url "https://github.com/dowhilelabs/papercut/releases/download/v0.1.0/papercut-aarch64-apple-darwin.tar.gz"
   # SHA-256 of papercut-aarch64-apple-darwin.tar.gz (v0.1.0 release).
-  sha256 "362511afdd37fcabd144346d9929ebe9ac5f3dec49bb28eb4622e164fd168900"
+  sha256 "e6a5564ccd87113b8d28e6f2f9175256d79e286508ea3fb46c19318492c370b1"
 
   depends_on :macos
 
