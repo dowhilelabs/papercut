@@ -79,7 +79,7 @@ fn detect_harness() -> Option<String> {
     std::env::args()
         .next()
         .and_then(|a| std::path::Path::new(&a).file_stem().map(|s| s.to_string_lossy().into_owned()))
-        .filter(|name| name != "papercuts")
+        .filter(|name| name != "papercut")
 }
 
 /// Resolve the filing user: git identity (repo-local over global), else $USER.

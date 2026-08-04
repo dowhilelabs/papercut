@@ -5,14 +5,14 @@ use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(
-    name = "papercuts",
+    name = "papercut",
     version,
     about = "A tiny CLI that gives AI agents a complaint box.",
     long_about = "Papercuts is an append-only journal where agents (and humans) file the friction \
 they hit during work — dead-end tool calls, broken links, misleading docs, footgun configs. \
 It lives in .papercuts.jsonl at the repo root so every complaint shows up in git diff and travels \
 with the repo. stdout is data-only (one JSON envelope); errors go to stderr with stable codes. \
-Run `papercuts schema` for the full machine contract."
+Run `papercut schema` for the full machine contract."
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -21,7 +21,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// File a papercut complaint (alias: `papercuts log`).
+    /// File a papercut complaint (alias: `papercut log`).
     Add(AddArgs),
     /// List papercuts, open-first then newest (severity-first digest in `--format md`).
     List(ListArgs),

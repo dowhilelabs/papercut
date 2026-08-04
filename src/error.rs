@@ -7,7 +7,7 @@
 use serde::Serialize;
 
 /// Documented process exit codes. These are stable and part of the machine
-/// contract exposed via `papercuts schema`.
+/// contract exposed via `papercut schema`.
 pub const EXIT_USAGE: i32 = 2;
 pub const EXIT_BAD_INPUT: i32 = 65; // sysexits EX_DATAERR
 pub const EXIT_NOT_FOUND: i32 = 66; // sysexits EX_NOINPUT
@@ -78,10 +78,10 @@ impl Error {
     /// Human guidance an agent can act on to recover, without help.
     pub fn suggested_fix(&self) -> String {
         match self {
-            Error::Usage(_) => "Check `papercuts --help` for the correct arguments and flags.".into(),
+            Error::Usage(_) => "Check `papercut --help` for the correct arguments and flags.".into(),
             Error::BadInput(_) => "The provided input was not usable. Fix the argument and retry.".into(),
             Error::NotFound(id) => format!(
-                "No record matched '{id}'. Use `papercuts list` to see current open IDs, then retry with a full or unique-prefix ID."
+                "No record matched '{id}'. Use `papercut list` to see current open IDs, then retry with a full or unique-prefix ID."
             ),
             Error::Internal(_) => "Unexpected internal failure. Report the output to the maintainers.".into(),
             Error::Io(_) => "The file could not be read or written. Check permissions, disk space, and that the path is not on a read-only volume.".into(),

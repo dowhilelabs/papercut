@@ -1,12 +1,12 @@
 ---
 name: papercuts
-description: "File a papercut when you hit genuine, recurring repo friction during work — a dead-end tool call, a broken link, a misleading doc, a footgun config, a missing helper. Also use to review, deduplicate, and resolve existing entries. Use the `papercuts` CLI to log to the repo journal so the friction becomes a fixable backlog instead of silently pushing through."
+description: "File a papercut when you hit genuine, recurring repo friction during work — a dead-end tool call, a broken link, a misleading doc, a footgun config, a missing helper. Also use to review, deduplicate, and resolve existing entries. Use the `papercut` CLI to log to the repo journal so the friction becomes a fixable backlog instead of silently pushing through."
 ---
 
 # Papercuts
 
 Capture small friction in the moment without derailing the current task. The
-`papercuts` CLI appends to `.papercuts.jsonl` at the repo root, so complaints
+`papercut` CLI appends to `.papercuts.jsonl` at the repo root, so complaints
 show up in git diffs and accumulate into a backlog that gets fixed periodically.
 
 ## The two-question test
@@ -41,13 +41,13 @@ Only the former is a papercut.
 
 ## How to file
 
-1. Check the backlog for an equivalent entry first: `papercuts list`.
+1. Check the backlog for an equivalent entry first: `papercut list`.
 2. Write a one- or two-sentence body: **what got in the way**, and the **smallest
    useful fix or workaround**. Lead with the friction, not with what you were doing.
 3. Run the CLI. The tool fills in who/what/when automatically.
 
 ```bash
-papercuts add "yarn web:test with a root-relative path finds no files; the workspace test cwd is apps/web" --tag tooling --severity minor
+papercut add "yarn web:test with a root-relative path finds no files; the workspace test cwd is apps/web" --tag tooling --severity minor
 ```
 
 Flags:
@@ -55,7 +55,7 @@ Flags:
 - `--tag <area>` (repeatable) — e.g. `tooling`, `docs`, `build`, `scripts`.
 - `--severity` — `minor` (annoyance, default) · `major` (time sink) · `blocker` (hard wall).
 - `--model` / `--harness` / `--user` — only if auto-detection got it wrong.
-- Long bodies: pipe to stdin — `printf '%s' "<text>" | papercuts add -`.
+- Long bodies: pipe to stdin — `printf '%s' "<text>" | papercut add -`.
 
 ## Review or resolve
 
@@ -68,11 +68,11 @@ When asked to review:
 2. Deduplicate and group related entries.
 3. Verify each surviving papercut still reproduces.
 4. Fix the smallest safe, high-leverage entries first.
-5. Mark fixed items resolved: `papercuts resolve <id>` (appends a resolved event).
+5. Mark fixed items resolved: `papercut resolve <id>` (appends a resolved event).
    Route real bugs to normal issue/fix work.
 
 ## The CLI contract
 
 - stdout is **data only** — one JSON envelope per command.
 - Errors go to **stderr** with stable codes and documented exit codes; exit `0`
-  on success including empty results. Run `papercuts schema` for the full contract.
+  on success including empty results. Run `papercut schema` for the full contract.

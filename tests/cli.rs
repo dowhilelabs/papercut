@@ -5,9 +5,9 @@ use serde_json::Value;
 use std::fs;
 use tempfile::tempdir;
 
-/// Run `papercuts` against a throwaway journal in `dir`, with fixed clock/user.
+/// Run `papercut` against a throwaway journal in `dir`, with fixed clock/user.
 fn pc(dir: &std::path::Path) -> Command {
-    let mut cmd = Command::cargo_bin("papercuts").unwrap();
+    let mut cmd = Command::cargo_bin("papercut").unwrap();
     cmd.current_dir(dir)
         .env("PAPERCUTS_FILE", dir.join("log.jsonl"))
         .env("PAPERCUTS_NOW", "2026-01-01T00:00:00.000Z")

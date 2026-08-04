@@ -1,4 +1,4 @@
-//! `papercuts schema` — the full machine contract, returned as JSON so agents can
+//! `papercut schema` — the full machine contract, returned as JSON so agents can
 //! self-orient without reading prose.
 
 use crate::output::CONTRACT_VERSION;
@@ -8,7 +8,7 @@ use serde_json::{json, Value};
 pub fn contract() -> Value {
     json!({
         "contract": CONTRACT_VERSION,
-        "tool": "papercuts",
+        "tool": "papercut",
         "journal": {
             "default": "<repo-root>/.papercuts.jsonl",
             "env_override": "PAPERCUTS_FILE",
