@@ -1,0 +1,3 @@
+# Parallel branches should merge the papercut journal cleanly.
+# Duplicate lines after a merge are harmless — add is duplicate-safe (first-wins).
+.papercuts.jsonl merge=union
