@@ -159,7 +159,15 @@ fn list_default_is_human_readable_text() {
         "default list should be human-readable, not JSON: {text}"
     );
     assert!(text.contains("a doc footgun"));
-    assert!(text.contains("open papercut"));
+    assert!(text.contains("Z"), "should show an RFC3339 timestamp: {text}");
+    assert!(
+        !text.contains("pc_"),
+        "human list should not show ids: {text}"
+    );
+    assert!(
+        !text.contains("[docs]") && !text.contains("docs"),
+        "human list should not show tags: {text}"
+    );
 }
 
 #[test]

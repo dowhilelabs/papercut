@@ -120,14 +120,6 @@ fn body_from(arg: &Option<String>) -> Result<String, Error> {
     }
 }
 
-fn severity_rank(s: &Severity) -> u8 {
-    match s {
-        Severity::Blocker => 3,
-        Severity::Major => 2,
-        Severity::Minor => 1,
-    }
-}
-
 fn resolved_ids(records: &[Record]) -> HashSet<String> {
     records
         .iter()
@@ -164,11 +156,7 @@ fn cmd_list(a: cli::ListArgs) -> Result<i32, Error> {
         })
         .collect();
 
-    cuts.sort_by(|x, y| {
-        severity_rank(&y.severity)
-            .cmp(&severity_rank(&x.severity))
-            .then_with(|| y.ts.cmp(&x.ts))
-    });
+    cuts.sort_by(|x, y| y.ts.cmp(&x.ts));
 
     let fmt = a.format.unwrap_or_else(|| "text".into());
     match fmt.as_str() {
@@ -197,47 +185,59 @@ fn cmd_list(a: cli::ListArgs) -> Result<i32, Error> {
     Ok(0)
 }
 
-fn render_text(cuts: &[&Cut], resolved: &HashSet<String>) -> String {
-    let mut out = String::new();
+/// Human-readable `list`. Matches the reference style: one header line
+/// (`ts - model - user`), a blank line, the wrapped body, then a blank line.
+/// No ids, severity, or tags here — those stay in `--format json` / `md`.
+fn render_text(cuts: &[&Cut], _resolved: &HashSet<String>) -> String {
     if cuts.is_empty() {
         return "No open papercuts.\n".to_string();
     }
-    let noun = if cuts.len() == 1 {
-        "papercut"
-    } else {
-        "papercuts"
-    };
-    out.push_str(&format!("{} open {noun}:\n\n", cuts.len()));
+    let mut out = String::new();
     for c in cuts {
-        let tags = if c.tags.is_empty() {
-            String::new()
-        } else {
-            format!(" [{}]", c.tags.join(", "))
-        };
-        let ctx = match (&c.harness, &c.model) {
-            (Some(h), Some(m)) => format!(" {h}/{m}"),
-            (Some(h), None) => format!(" {h}"),
-            (None, Some(m)) => format!(" {m}"),
-            (None, None) => String::new(),
-        };
-        let user = c
-            .user
-            .as_ref()
-            .map(|u| format!(" · {u}"))
-            .unwrap_or_default();
-        let done = if resolved.contains(&c.id) {
-            " ✓ resolved"
-        } else {
-            ""
-        };
-        out.push_str(&format!(
-            "{id} · {sev}{tags}{ctx}{user}{done}\n    {text}\n\n",
-            id = c.id,
-            sev = c.severity,
-            text = c.text,
-        ));
+        let mut header = format_ts(&c.ts);
+        if let Some(m) = &c.model {
+            header.push_str(&format!(" - {m}"));
+        }
+        if let Some(u) = &c.user {
+            header.push_str(&format!(" - {u}"));
+        }
+        out.push_str(&format!("{header}\n\n{}\n\n", wrap(&c.text, 80)));
     }
     out
+}
+
+/// Format a stored RFC3339 ts as milliseconds (`2026-07-08T21:13:30.864Z`) to
+/// match the reference list. Falls back to the raw string if it won't parse.
+fn format_ts(ts: &str) -> String {
+    match Timestamp::from_str(ts) {
+        Ok(t) => {
+            let mut s = t.strftime("%Y-%m-%dT%H:%M:%S%.3f").to_string();
+            s.push('Z');
+            s
+        }
+        Err(_) => ts.to_string(),
+    }
+}
+
+/// Greedy word-wrap to `width` columns, matching the reference's wrapped bodies.
+fn wrap(text: &str, width: usize) -> String {
+    let mut lines: Vec<String> = Vec::new();
+    let mut line = String::new();
+    for word in text.split_whitespace() {
+        if !line.is_empty() && line.len() + 1 + word.len() > width {
+            lines.push(std::mem::take(&mut line));
+        }
+        if line.is_empty() {
+            line.push_str(word);
+        } else {
+            line.push(' ');
+            line.push_str(word);
+        }
+    }
+    if !line.is_empty() {
+        lines.push(line);
+    }
+    lines.join("\n")
 }
 
 fn render_markdown(cuts: &[&Cut], resolved: &HashSet<String>) -> String {

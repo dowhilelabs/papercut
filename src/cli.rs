@@ -26,8 +26,9 @@ pub enum Command {
     /// File a papercut complaint. Default subcommand: `papercut -m <model> "message"`.
     #[command(visible_alias = "log")]
     Add(AddArgs),
-    /// List papercuts, severity-first then newest. Defaults to a human-readable
-    /// table; `--format json` for machine parsing, `md` for markdown.
+    /// List papercuts, newest first. Defaults to a human-readable digest
+    /// (`ts - model - user` then the body); `--format json` for machine parsing,
+    /// `md` for markdown.
     List(ListArgs),
     /// Mark a papercut fixed (appends a resolved event; never rewrites history).
     Resolve(ResolveArgs),

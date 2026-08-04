@@ -76,7 +76,8 @@ When asked to review:
 
 ## The CLI contract
 
-- `papercut list` is **human-readable** by default; use `papercut list --format json`
-  for a data-only JSON envelope to parse programmatically.
+- `papercut list` is **human-readable** by default (a `ts - model - user` header,
+  then the body — no ids/severity/tags in the digest); use `papercut list --format json`
+  for a data-only JSON envelope (which *does* include id, severity, and tags).
 - Errors go to **stderr** with stable codes and documented exit codes; exit `0`
   on success including empty results. Run `papercut schema` for the full contract.

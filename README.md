@@ -16,7 +16,7 @@ brew install papercut
 #    (add is the default subcommand; `-m` records the model explicitly)
 papercut "yarn web:test with a root-relative path finds no files; the workspace test cwd is apps/web" --tag tooling
 
-# 3. Review the backlog (severity-first)
+# 3. Review the backlog
 papercut list
 papercut list --format md   # human digest
 ```
@@ -43,7 +43,7 @@ papercut "text"                  # file a papercut (add is the default subcomman
 papercut -m gpt-5 "text"         # ... with the model recorded explicitly
 papercut add "text"              # explicit subcommand (also: papercut log)
 papercut add -                   # file from stdin (good for long bodies)
-papercut list                    # human-readable, open items first
+papercut list                    # human-readable digest (ts - model - user + body)
 papercut list --format md        # markdown digest
 papercut list --format json      # machine/agent JSON
 papercut list --all              # include resolved items
