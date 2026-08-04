@@ -13,7 +13,7 @@ papercuts add "yarn web:test with a root-relative path finds no files; the works
 
 ```bash
 # This repository doubles as a Homebrew tap (it ships a Formula/).
-brew tap treygoff24/papercuts
+brew tap dowhilelabs/papercut
 brew install papercuts
 ```
 

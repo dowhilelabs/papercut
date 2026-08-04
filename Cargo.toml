@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "A tiny CLI that gives AI agents a complaint box."
 license = "MIT"
-repository = "https://github.com/treygoff24/papercuts"
+repository = "https://github.com/dowhilelabs/papercut"
 
 [[bin]]
 name = "papercuts"
