@@ -73,6 +73,7 @@ When asked to review:
 
 ## The CLI contract
 
-- stdout is **data only** — one JSON envelope per command.
+- `papercut list` is **human-readable** by default; use `papercut list --format json`
+  for a data-only JSON envelope to parse programmatically.
 - Errors go to **stderr** with stable codes and documented exit codes; exit `0`
   on success including empty results. Run `papercut schema` for the full contract.

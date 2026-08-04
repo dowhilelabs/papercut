@@ -37,8 +37,9 @@ pub fn contract() -> Value {
             },
             "list": {
                 "read": true,
+                "default": "human-readable text table",
                 "args": {
-                    "--format": "json (default) | md",
+                    "--format": "text (default) | json | md",
                     "--all": "include resolved records",
                     "--tag": "filter by tag"
                 }
@@ -91,7 +92,7 @@ pub fn contract() -> Value {
             "77": "permission denied",
             "78": "config"
         },
-        "stdout": "data only; one JSON envelope per command",
+        "stdout": "list defaults to human-readable text; --format json is data-only. Other commands emit one JSON envelope",
         "stderr": "errors only; one JSON envelope with code, exit, message, suggested_fix"
     })
 }

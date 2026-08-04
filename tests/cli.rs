@@ -102,11 +102,32 @@ fn list_returns_open_cuts_json() {
         .args(["add", "second", "-t", "docs"])
         .output()
         .unwrap();
-    let out = pc(dir.path()).arg("list").output().unwrap();
+    let out = pc(dir.path())
+        .args(["list", "--format", "json"])
+        .output()
+        .unwrap();
     assert!(out.status.success());
     let v = json_of(&String::from_utf8(out.stdout).unwrap());
     assert_eq!(v["data"]["count"], 2);
     assert_eq!(v["data"]["records"].as_array().unwrap().len(), 2);
+}
+
+#[test]
+fn list_default_is_human_readable_text() {
+    let dir = tempdir().unwrap();
+    pc(dir.path())
+        .args(["add", "a doc footgun", "-t", "docs"])
+        .output()
+        .unwrap();
+    let out = pc(dir.path()).arg("list").output().unwrap();
+    assert!(out.status.success());
+    let text = String::from_utf8(out.stdout).unwrap();
+    assert!(
+        !text.trim_start().starts_with('{'),
+        "default list should be human-readable, not JSON: {text}"
+    );
+    assert!(text.contains("a doc footgun"));
+    assert!(text.contains("open papercut"));
 }
 
 #[test]
@@ -117,8 +138,7 @@ fn list_markdown_format() {
         .args(["list", "--format", "md"])
         .output()
         .unwrap();
-    let v = json_of(&String::from_utf8(out.stdout).unwrap());
-    let md = v["data"]["markdown"].as_str().unwrap();
+    let md = String::from_utf8(out.stdout).unwrap();
     assert!(md.contains("a doc footgun"));
     assert!(md.contains("## Open"));
 }
@@ -143,10 +163,16 @@ fn resolve_marks_fixed_and_is_idempotent() {
     assert_eq!(v2["data"]["changed"], false, "resolving twice is a no-op");
 
     // It disappears from default list, but appears with --all.
-    let list = pc(dir.path()).arg("list").output().unwrap();
+    let list = pc(dir.path())
+        .args(["list", "--format", "json"])
+        .output()
+        .unwrap();
     let lv = json_of(&String::from_utf8(list.stdout).unwrap());
     assert_eq!(lv["data"]["count"], 0);
-    let all = pc(dir.path()).args(["list", "--all"]).output().unwrap();
+    let all = pc(dir.path())
+        .args(["list", "--all", "--format", "json"])
+        .output()
+        .unwrap();
     let av = json_of(&String::from_utf8(all.stdout).unwrap());
     assert_eq!(av["data"]["count"], 1);
 }

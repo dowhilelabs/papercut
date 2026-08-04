@@ -1,4 +1,5 @@
-//! Command-line surface. stdout stays data-only; the schema command documents the
+//! Command-line surface. `list` defaults to human-readable text (--format json
+//! is data-only); the schema command documents the full machine contract.
 //! full machine contract for self-orienting agents.
 
 use clap::{Args, Parser, Subcommand};
@@ -11,7 +12,8 @@ use clap::{Args, Parser, Subcommand};
     long_about = "Papercuts is an append-only journal where agents (and humans) file the friction \
 they hit during work — dead-end tool calls, broken links, misleading docs, footgun configs. \
 It lives in .papercuts.jsonl at the repo root so every complaint shows up in git diff and travels \
-with the repo. stdout is data-only (one JSON envelope); errors go to stderr with stable codes. \
+with the repo. `papercut list` is human-readable by default; other commands emit one JSON envelope; \
+errors go to stderr with stable codes. \
 Run `papercut schema` for the full machine contract."
 )]
 pub struct Cli {
@@ -23,7 +25,8 @@ pub struct Cli {
 pub enum Command {
     /// File a papercut complaint (alias: `papercut log`).
     Add(AddArgs),
-    /// List papercuts, open-first then newest (severity-first digest in `--format md`).
+    /// List papercuts, severity-first then newest. Defaults to a human-readable
+    /// table; `--format json` for machine parsing, `md` for markdown.
     List(ListArgs),
     /// Mark a papercut fixed (appends a resolved event; never rewrites history).
     Resolve(ResolveArgs),
@@ -57,8 +60,8 @@ pub struct AddArgs {
 
 #[derive(Args)]
 pub struct ListArgs {
-    /// Output format: json (default) | md.
-    #[arg(long)]
+    /// Output format: text (default) | json | md.
+    #[arg(long, value_name = "FORMAT")]
     pub format: Option<String>,
     /// Include resolved records (default: open cuts only).
     #[arg(long)]

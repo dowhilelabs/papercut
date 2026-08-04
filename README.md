@@ -40,8 +40,9 @@ Or, from source: `cargo install --path .`
 ```bash
 papercut add "text"            # file a papercut (also: papercut log)
 papercut add -                 # file from stdin (good for long bodies)
-papercut list                  # open items, severity-first, JSON
-papercut list --format md      # human review digest
+papercut list                  # human-readable, open items first
+papercut list --format md      # markdown digest
+papercut list --format json    # machine/agent JSON
 papercut list --all            # include resolved items
 papercut resolve pc_9f2c41d0   # mark one fixed (full or prefix id)
 papercut doctor                # validate the journal
@@ -81,9 +82,9 @@ Then periodically run `papercut list --format md` and fix what keeps coming up.
 - **Config** — `PAPERCUTS_FILE` overrides the journal path; `PAPERCUTS_MODEL`,
   `PAPERCUTS_HARNESS`, `PAPERCUTS_USER` override detected identity; `PAPERCUTS_NOW`
   pins the timestamp (for reproducible tests).
-- **Agents** — stdout is data only (one JSON envelope per command); errors go to
-  stderr with stable codes and documented exit codes. `papercut schema` returns
-  the full machine contract.
+- **Agents** — use `papercut list --format json` for a data-only JSON envelope;
+  plain `list` is human-readable. Errors go to stderr with stable codes and
+  documented exit codes. `papercut schema` returns the full machine contract.
 - **Concurrency** — safe for multiple agents on one file (locking, atomic
   appends, self-healing torn lines, duplicate suppression).
 

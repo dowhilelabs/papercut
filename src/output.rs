@@ -1,7 +1,6 @@
-//! Output helpers: every success is a single JSON envelope on stdout.
-//!
-//! stdout is data-only (one JSON envelope per command); errors go to stderr via
-//! `crate::error`. This keeps the CLI trivially parseable by agents.
+//! Output helpers. Most commands emit a single JSON envelope on stdout; `list`
+//! defaults to human-readable text (`--format json` is the data-only envelope).
+//! Errors go to stderr via `crate::error`.
 
 use serde::Serialize;
 

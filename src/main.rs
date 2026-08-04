@@ -147,8 +147,12 @@ fn cmd_list(a: cli::ListArgs) -> Result<i32, Error> {
             .then_with(|| y.ts.cmp(&x.ts))
     });
 
-    let fmt = a.format.unwrap_or_else(|| "json".into());
+    let fmt = a.format.unwrap_or_else(|| "text".into());
     match fmt.as_str() {
+        // Human-facing: plain readable output, no envelope.
+        "text" | "table" => print!("{}", render_text(&cuts, &resolved)),
+        "md" | "markdown" => print!("{}", render_markdown(&cuts, &resolved)),
+        // Machine-facing: data-only JSON envelope.
         "json" => {
             #[derive(serde::Serialize)]
             struct ListData<'a> {
@@ -161,21 +165,56 @@ fn cmd_list(a: cli::ListArgs) -> Result<i32, Error> {
             };
             output::print_envelope(data, &file);
         }
-        "md" => {
-            let md = render_markdown(&cuts, &resolved);
-            #[derive(serde::Serialize)]
-            struct MdData {
-                markdown: String,
-            }
-            output::print_envelope(MdData { markdown: md }, &file);
-        }
         other => {
             return Err(error::usage(format!(
-                "invalid --format '{other}' (expected json | md)"
+                "invalid --format '{other}' (expected text | json | md)"
             )))
         }
     }
     Ok(0)
+}
+
+fn render_text(cuts: &[&Cut], resolved: &HashSet<String>) -> String {
+    let mut out = String::new();
+    if cuts.is_empty() {
+        return "No open papercuts.\n".to_string();
+    }
+    let noun = if cuts.len() == 1 {
+        "papercut"
+    } else {
+        "papercuts"
+    };
+    out.push_str(&format!("{} open {noun}:\n\n", cuts.len()));
+    for c in cuts {
+        let tags = if c.tags.is_empty() {
+            String::new()
+        } else {
+            format!(" [{}]", c.tags.join(", "))
+        };
+        let ctx = match (&c.harness, &c.model) {
+            (Some(h), Some(m)) => format!(" {h}/{m}"),
+            (Some(h), None) => format!(" {h}"),
+            (None, Some(m)) => format!(" {m}"),
+            (None, None) => String::new(),
+        };
+        let user = c
+            .user
+            .as_ref()
+            .map(|u| format!(" · {u}"))
+            .unwrap_or_default();
+        let done = if resolved.contains(&c.id) {
+            " ✓ resolved"
+        } else {
+            ""
+        };
+        out.push_str(&format!(
+            "{id} · {sev}{tags}{ctx}{user}{done}\n    {text}\n\n",
+            id = c.id,
+            sev = c.severity,
+            text = c.text,
+        ));
+    }
+    out
 }
 
 fn render_markdown(cuts: &[&Cut], resolved: &HashSet<String>) -> String {
