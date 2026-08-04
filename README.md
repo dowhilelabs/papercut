@@ -79,6 +79,17 @@ Then run `papercut list --format md` periodically and fix what keeps coming up.
 - **Concurrency** — safe for multiple agents on one file (locking, atomic
   appends, self-healing torn lines, duplicate suppression).
 
+## In the wild
+
+[@steveruizok](https://twitter.com/steveruizok) built the same idea independently:
+
+> I added a tiny "papercuts" cli tool that agents can use to complain about
+> bullshit they encountered during work, like dead-end tool calls, broken links,
+> or other frustrations. The models would usually just push through without
+> mentioning any problems.
+
+— [twitter.com/steveruizok/status/2075303919664734295](https://twitter.com/steveruizok/status/2075303919664734295)
+
 ## Development
 
 ```bash
