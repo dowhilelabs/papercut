@@ -12,7 +12,6 @@ fn pc(dir: &std::path::Path) -> Command {
         .env("PAPERCUTS_FILE", dir.join("log.jsonl"))
         .env("PAPERCUTS_NOW", "2026-01-01T00:00:00.000Z")
         .env("PAPERCUTS_USER", "tester@example.com")
-        .env("PAPERCUTS_HARNESS", "test-harness")
         .env("PAPERCUTS_MODEL", "test-model");
     cmd
 }
@@ -25,7 +24,7 @@ fn json_of(stdout: &str) -> Value {
 fn add_writes_record_and_returns_envelope() {
     let dir = tempdir().unwrap();
     let out = pc(dir.path())
-        .args(["add", "yarn web:test finds no files", "--tag", "tooling"])
+        .args(["add", "yarn web:test finds no files"])
         .output()
         .unwrap();
     assert!(out.status.success());
@@ -36,8 +35,6 @@ fn add_writes_record_and_returns_envelope() {
     assert_eq!(v["data"]["record"]["text"], "yarn web:test finds no files");
     assert_eq!(v["data"]["record"]["user"], "tester@example.com");
     assert_eq!(v["data"]["record"]["model"], "test-model");
-    assert_eq!(v["data"]["record"]["harness"], "test-harness");
-    assert_eq!(v["data"]["record"]["tags"][0], "tooling");
     assert!(v["data"]["record"]["id"]
         .as_str()
         .unwrap()
@@ -53,8 +50,8 @@ fn add_is_duplicate_safe() {
     let dir = tempdir().unwrap();
     let mut cmd_a = pc(dir.path());
     let mut cmd_b = pc(dir.path());
-    cmd_a.args(["add", "same complaint", "-t", "x"]);
-    cmd_b.args(["add", "same complaint", "-t", "x"]);
+    cmd_a.args(["add", "same complaint"]);
+    cmd_b.args(["add", "same complaint"]);
     let o1 = cmd_a.output().unwrap();
     let o2 = cmd_b.output().unwrap();
     assert!(o1.status.success() && o2.status.success());
@@ -71,7 +68,7 @@ fn add_is_duplicate_safe() {
 fn add_reads_stdin() {
     let dir = tempdir().unwrap();
     let mut cmd = pc(dir.path());
-    cmd.arg("add").arg("-").arg("-t").arg("stdin");
+    cmd.arg("add").arg("-");
     cmd.write_stdin("a problem surfaced only via stdin");
     let out = cmd.output().unwrap();
     assert!(out.status.success());
@@ -131,7 +128,7 @@ fn list_returns_open_cuts_json() {
         .output()
         .unwrap();
     pc(dir.path())
-        .args(["add", "second", "-t", "docs"])
+        .args(["add", "second"])
         .output()
         .unwrap();
     let out = pc(dir.path())
@@ -148,7 +145,7 @@ fn list_returns_open_cuts_json() {
 fn list_default_is_human_readable_text() {
     let dir = tempdir().unwrap();
     pc(dir.path())
-        .args(["add", "a doc footgun", "-t", "docs"])
+        .args(["add", "a doc footgun"])
         .output()
         .unwrap();
     let out = pc(dir.path()).arg("list").output().unwrap();
@@ -163,10 +160,6 @@ fn list_default_is_human_readable_text() {
     assert!(
         !text.contains("pc_"),
         "human list should not show ids: {text}"
-    );
-    assert!(
-        !text.contains("[docs]") && !text.contains("docs"),
-        "human list should not show tags: {text}"
     );
 }
 
@@ -186,7 +179,7 @@ fn list_text_separates_entries_with_delimiter() {
 #[test]
 fn list_markdown_format() {
     let dir = tempdir().unwrap();
-    pc(dir.path()).args(["add", "a doc footgun", "-t", "docs"]).output().unwrap();
+    pc(dir.path()).args(["add", "a doc footgun"]).output().unwrap();
     let out = pc(dir.path())
         .args(["list", "--format", "md"])
         .output()
@@ -258,7 +251,7 @@ fn schema_returns_contract() {
     assert!(out.status.success());
     let v = json_of(&String::from_utf8(out.stdout).unwrap());
     assert_eq!(v["ok"], true);
-    assert_eq!(v["data"]["contract"], 1);
+    assert_eq!(v["data"]["contract"], 2);
     assert!(v["data"]["commands"]["add"]["write"] == true);
 }
 

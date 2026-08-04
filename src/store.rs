@@ -160,7 +160,7 @@ fn git_root() -> Option<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::record::{Cut, Severity};
+    use crate::record::{Cut};
 
     fn store_in(dir: &Path) -> Store {
         Store {
@@ -173,11 +173,8 @@ mod tests {
             id: id.into(),
             ts: "2026-01-01T00:00:00.000Z".into(),
             model: None,
-            harness: None,
             user: None,
             text: text.into(),
-            tags: vec![],
-            severity: Severity::Minor,
         })
     }
 

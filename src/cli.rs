@@ -9,11 +9,11 @@ use clap::{Args, Parser, Subcommand};
     name = "papercut",
     version,
     about = "A tiny CLI that gives AI agents a complaint box.",
-    long_about = "Papercuts is an append-only journal where agents (and humans) file the friction \
-they hit during work — dead-end tool calls, broken links, misleading docs, footgun configs. \
-It lives in .papercuts.jsonl at the repo root so every complaint shows up in git diff and travels \
-with the repo. `papercut list` is human-readable by default; other commands emit one JSON envelope; \
-errors go to stderr with stable codes. \
+    long_about = "A complaint box for AI agents. When an agent hits a dead end or something \
+that doesn't make sense while working, it files a one-line papercut into \
+.papercuts.jsonl (local to the machine). Agents write papercuts; humans and \
+agents read the backlog. `papercut list` is human-readable by default; other \
+commands emit one JSON envelope; errors go to stderr with stable codes. \
 Run `papercut schema` for the full machine contract."
 )]
 pub struct Cli {
@@ -43,18 +43,9 @@ pub struct AddArgs {
     /// The complaint body. Pass `-` or omit (with piped stdin) to read from stdin.
     #[arg(value_name = "TEXT")]
     pub text: Option<String>,
-    /// Area tag, repeatable: `--tag tooling --tag docs`.
-    #[arg(short = 't', long = "tag", action = clap::ArgAction::Append)]
-    pub tags: Vec<String>,
-    /// Severity: minor | major | blocker.
-    #[arg(long, default_value = "minor")]
-    pub severity: String,
-    /// Override the detected model (e.g. `-m claude-sonnet-4-5`).
+    /// Override the detected model (e.g. `-m gpt-5`).
     #[arg(short = 'm', long)]
     pub model: Option<String>,
-    /// Override the detected harness.
-    #[arg(long)]
-    pub harness: Option<String>,
     /// Override the detected user.
     #[arg(long)]
     pub user: Option<String>,
@@ -68,9 +59,6 @@ pub struct ListArgs {
     /// Include resolved records (default: open cuts only).
     #[arg(long)]
     pub all: bool,
-    /// Only records carrying this tag.
-    #[arg(long)]
-    pub tag: Option<String>,
 }
 
 #[derive(Args)]

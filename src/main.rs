@@ -10,7 +10,7 @@ use clap::{CommandFactory, Parser};
 use cli::{Cli, Command};
 use error::Error;
 use jiff::Timestamp;
-use record::{Cut, Record, Resolved, Severity, make_cut_id};
+use record::{Cut, Record, Resolved, make_cut_id};
 use std::collections::HashSet;
 use std::ffi::OsString;
 use std::io::Read;
@@ -73,24 +73,16 @@ fn cmd_add(a: cli::AddArgs) -> Result<i32, Error> {
         return Err(error::bad_input("complaint body is empty"));
     }
 
-    let severity: Severity = a
-        .severity
-        .parse()
-        .map_err(|e: String| error::bad_input(e))?;
-
-    let ctx = context::resolve(a.model.as_deref(), a.harness.as_deref(), a.user.as_deref());
-    let id = make_cut_id(text.trim(), &a.tags, severity);
+    let ctx = context::resolve(a.model.as_deref(), a.user.as_deref());
+    let id = make_cut_id(text.trim());
     let ts = now_ts()?;
 
     let cut = Cut {
         id,
         ts,
         model: ctx.model,
-        harness: ctx.harness,
         user: ctx.user,
         text: text.trim().to_string(),
-        tags: a.tags,
-        severity,
     };
     let record = Record::Cut(cut);
 
@@ -150,10 +142,6 @@ fn cmd_list(a: cli::ListArgs) -> Result<i32, Error> {
                 !resolved.contains(&c.id)
             }
         })
-        .filter(|c| match &a.tag {
-            Some(tag) => c.tags.iter().any(|t| t == tag),
-            None => true,
-        })
         .collect();
 
     cuts.sort_by(|x, y| y.ts.cmp(&x.ts));
@@ -187,7 +175,6 @@ fn cmd_list(a: cli::ListArgs) -> Result<i32, Error> {
 
 /// Human-readable `list`. Matches the reference style: one header line
 /// (`ts - model - user`), a blank line, the wrapped body, then a blank line.
-/// No ids, severity, or tags here — those stay in `--format json` / `md`.
 fn render_text(cuts: &[&Cut], _resolved: &HashSet<String>) -> String {
     if cuts.is_empty() {
         return "No open papercuts.\n".to_string();
@@ -249,35 +236,20 @@ fn render_markdown(cuts: &[&Cut], resolved: &HashSet<String>) -> String {
     }
     out.push_str(&format!("## Open ({})\n\n", cuts.len()));
     for c in cuts {
-        let tags = if c.tags.is_empty() {
-            String::new()
-        } else {
-            format!(" `[{}]`", c.tags.join(", "))
-        };
-        let ctx = match (&c.harness, &c.model) {
-            (Some(h), Some(m)) => format!(" `{h}/{m}`"),
-            (Some(h), None) => format!(" `{h}`"),
-            (None, Some(m)) => format!(" `{m}`"),
-            (None, None) => String::new(),
-        };
-        let user = c
-            .user
-            .as_ref()
-            .map(|u| format!(" — {u}"))
-            .unwrap_or_default();
+        let user = c.user.as_deref().unwrap_or("");
+        let model = c.model.as_deref().unwrap_or("");
         let resolved_mark = if resolved.contains(&c.id) {
             "[x]"
         } else {
             "[ ]"
         };
         out.push_str(&format!(
-            "- {resolved_mark} `{}` — **{}** — {}{}{}{}\n",
+            "- {resolved_mark} `{}` — {} — {} — {}\n  {}\n",
             c.id,
-            c.severity,
-            c.text,
-            tags,
-            ctx,
-            user
+            format_ts(&c.ts),
+            model,
+            user,
+            c.text
         ));
     }
     out
@@ -318,7 +290,7 @@ fn cmd_resolve(a: cli::ResolveArgs) -> Result<i32, Error> {
     let record = Record::Resolved(Resolved {
         id: target_id.clone(),
         ts: now_ts()?,
-        by: context::resolve(None, None, None).user,
+        by: context::resolve(None, None).user,
         note: a.note,
     });
 

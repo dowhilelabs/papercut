@@ -22,7 +22,7 @@ look for `homebrew-papercut`.)
 ## Quickstart
 
 ```bash
-papercut "yarn web:test finds no files — the workspace test cwd is apps/web" --tag tooling
+papercut "yarn web:test finds no files — the workspace test cwd is apps/web"
 papercut list
 ```
 
@@ -38,9 +38,9 @@ papercut list --all        # include resolved
 papercut resolve <id>      # mark one fixed
 ```
 
-Each entry records who (git identity), what (model/harness, for agent-filed),
-when (RFC3339 UTC), plus tags and severity. Everything is append-only —
-`resolve` adds an event, it never rewrites history.
+Each entry records who (git identity), what (model, for agent-filed), and when
+(RFC3339 UTC). Everything is append-only — `resolve` adds an event, it never
+rewrites history.
 
 ## Where papercuts live
 
@@ -61,11 +61,10 @@ When you hit a dead end or something that doesn't make sense while working — a
 tool call that misses or errors oddly, a setup step with no obvious reason, a
 command that behaves unexpectedly — file it in the moment:
 
-    papercut "<what you were doing → what got in the way>" --tag <area>
+    papercut "<what you were doing → what got in the way>"
 
 One or two sentences. File it whenever you hit the wall, even if nothing is
-blocking. Severity: minor (default) for annoyances, major for time sinks,
-blocker for hard walls.
+blocking.
 ```
 
 Then run `papercut list --format md` periodically and fix what keeps coming up.
@@ -73,9 +72,9 @@ Then run `papercut list --format md` periodically and fix what keeps coming up.
 ## Details
 
 - **Agents / machines** — `papercut list --format json` emits a data-only JSON
-  envelope (with id, severity, tags); plain `list` is the human digest.
+  envelope (with id); plain `list` is the human digest.
 - **Config** — `PAPERCUTS_FILE` overrides the journal path; `PAPERCUTS_MODEL`,
-  `PAPERCUTS_HARNESS`, `PAPERCUTS_USER` override detected identity; `PAPERCUTS_NOW`
+  `PAPERCUTS_USER` override detected identity; `PAPERCUTS_NOW`
   pins the timestamp. `papercut schema` prints the full machine contract.
 - **Concurrency** — safe for multiple agents on one file (locking, atomic
   appends, self-healing torn lines, duplicate suppression).

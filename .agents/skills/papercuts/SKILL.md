@@ -51,14 +51,12 @@ Only the former is a papercut.
 
 ```bash
 # add is the default subcommand, so the message is the first positional
-papercut "yarn web:test with a root-relative path finds no files; the workspace test cwd is apps/web" --tag tooling --severity minor
+papercut "yarn web:test with a root-relative path finds no files; the workspace test cwd is apps/web"
 ```
 
 Flags:
 
-- `--tag <area>` (repeatable) — e.g. `tooling`, `docs`, `build`, `scripts`.
-- `--severity` — `minor` (annoyance, default) · `major` (time sink) · `blocker` (hard wall).
-- `-m` / `--model`, `--harness`, `--user` — only if auto-detection got it wrong.
+- `-m` / `--model`, `--user` — only if auto-detection got it wrong.
 - Long bodies: pipe to stdin — `printf '%s' "<text>" | papercut add -`.
 
 ## Review or resolve
@@ -78,7 +76,7 @@ When asked to review:
 ## The CLI contract
 
 - `papercut list` is **human-readable** by default (a `ts - model - user` header,
-  then the body — no ids/severity/tags in the digest); use `papercut list --format json`
-  for a data-only JSON envelope (which *does* include id, severity, and tags).
+  then the body — no ids in the digest); use `papercut list --format json`
+  for a data-only JSON envelope (which *does* include the id).
 - Errors go to **stderr** with stable codes and documented exit codes; exit `0`
   on success including empty results. Run `papercut schema` for the full contract.

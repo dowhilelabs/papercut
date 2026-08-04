@@ -4,7 +4,7 @@
 
 use serde::Serialize;
 
-pub const CONTRACT_VERSION: u32 = 1;
+pub const CONTRACT_VERSION: u32 = 2;
 
 #[derive(Serialize)]
 pub struct Meta {

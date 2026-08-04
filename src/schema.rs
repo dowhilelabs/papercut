@@ -19,7 +19,6 @@ pub fn contract() -> Value {
         "env": {
             "PAPERCUTS_FILE": { "read": true, "write": false, "desc": "Override journal path" },
             "PAPERCUTS_MODEL": { "read": true, "write": false, "desc": "Override detected model" },
-            "PAPERCUTS_HARNESS": { "read": true, "write": false, "desc": "Override detected harness" },
             "PAPERCUTS_USER": { "read": true, "write": false, "desc": "Override detected user" },
             "PAPERCUTS_NOW": { "read": true, "write": false, "desc": "Deterministic RFC3339 timestamp override for tests" }
         },
@@ -30,19 +29,16 @@ pub fn contract() -> Value {
                 "write": true,
                 "args": {
                     "text": "positional; '-' or omitted reads stdin",
-                    "--tag/-t": "repeatable area tag",
-                    "--severity": "minor | major | blocker (default minor)",
-                    "-m/--model, --harness, --user": "override detected context"
+                    "-m/--model, --user": "override detected context"
                 },
                 "exit": { "0": "appended", "no-op": "duplicate suppressed (first-wins)" }
             },
             "list": {
                 "read": true,
-                "default": "human-readable text table",
+                "default": "human-readable text digest",
                 "args": {
                     "--format": "text (default) | json | md",
-                    "--all": "include resolved records",
-                    "--tag": "filter by tag"
+                    "--all": "include resolved records"
                 }
             },
             "resolve": {
@@ -58,11 +54,8 @@ pub fn contract() -> Value {
                 "id": "pc_<sha256-hex-10> content-addressed",
                 "ts": "RFC3339 UTC, PAPERCUTS_NOW override",
                 "model": "string|null, detected/override",
-                "harness": "string|null, detected/override",
                 "user": "string|null, git config or env",
-                "text": "string, unbounded",
-                "tags": ["string"],
-                "severity": "minor|major|blocker"
+                "text": "string, unbounded"
             },
             "kind_resolved": {
                 "kind": "resolved",
