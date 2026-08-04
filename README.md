@@ -66,13 +66,20 @@ friction instead of silently pushing through:
 
 ```markdown
 ## Papercuts
-When you hit friction — a dead-end tool call, a broken link, a misleading doc,
-a footgun config, a missing helper — file it before moving on:
 
-    papercut add "<what you hit and what would have prevented it>" --tag <area>
+When you hit small friction while working — a tool call that missed and had to
+be retried, a confusing or undocumented setup step, a flaky command, a stale
+cache, a misleading error, a non-obvious gotcha — file it in the moment:
 
-Don't stop working; file it and push through. Severity: minor (default) for
-annoyances, major for time sinks, blocker for hard walls.
+    papercut add "<what you were doing → what got in the way>" --tag <area>
+
+One or two sentences: what you were doing → what got in the way (a guess at the
+cause or fix is a bonus). Do this proactively, even though none of it is
+blocking — logged together it shows where the repo needs sanding down. Severity:
+minor (default) for annoyances, major for time sinks, blocker for hard walls.
+
+This is distinct from your task log (what you accomplished) and from real bug
+tracking (reproducible bugs / tracked work).
 ```
 
 Then periodically run `papercut list --format md` and fix what keeps coming up.

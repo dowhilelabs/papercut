@@ -5,7 +5,9 @@ description: "File a papercut when you hit genuine, recurring repo friction duri
 
 # Papercuts
 
-Capture small friction in the moment without derailing the current task. The
+Capture small friction in the moment without derailing the current task. These
+are distinct from your task log (what you accomplished) and from real bug
+tracking (reproducible bugs / tracked work). The
 `papercut` CLI appends to `.papercuts.jsonl` at the repo root, so complaints
 show up in git diffs and accumulate into a backlog that gets fixed periodically.
 
@@ -42,8 +44,8 @@ Only the former is a papercut.
 ## How to file
 
 1. Check the backlog for an equivalent entry first: `papercut list`.
-2. Write a one- or two-sentence body: **what got in the way**, and the **smallest
-   useful fix or workaround**. Lead with the friction, not with what you were doing.
+2. Write a one- or two-sentence body: **what you were doing → what got in the way**,
+   with a guess at the cause or fix as a bonus. Lead with the friction.
 3. Run the CLI. The tool fills in who/what/when automatically.
 
 ```bash
