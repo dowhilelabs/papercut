@@ -1,27 +1,28 @@
 ---
 name: papercuts
-description: "File a papercut when you hit genuine, recurring repo friction during work — a dead-end tool call, a broken link, a misleading doc, a footgun config, a missing helper. Also use to review, deduplicate, and resolve existing entries. Use the `papercut` CLI to log to the repo journal so the friction becomes a fixable backlog instead of silently pushing through."
+description: "File a papercut when you hit a dead end or something that doesn't make sense while working — a tool call that misses or errors oddly, a setup step with no obvious reason, a command that behaves unexpectedly. Log it so a future reader doesn't trip on it again. Also use to review, deduplicate, and resolve existing entries."
 ---
 
 # Papercuts
 
-Capture small friction in the moment without derailing the current task. These
-are distinct from your task log (what you accomplished) and from real bug
-tracking (reproducible bugs / tracked work). The
-`papercut` CLI appends to `.papercuts.jsonl` at the repo root, so complaints
-accumulate into a local, per-machine backlog that gets fixed periodically.
+Capture dead ends and confusing moments in the moment, without derailing the
+current task. These are distinct from your task log (what you accomplished) and
+from real bug tracking (reproducible bugs / tracked work). The `papercut` CLI
+appends to `.papercuts.jsonl` at the repo root, so dead ends accumulate into a
+local backlog that humans and future agents can read.
 
-## The two-question test
+## Is it worth a papercut?
 
-File a papercut only if **both** are true:
+Log it when you hit a real dead end or something that didn't make sense — the
+kind of thing a future reader (human or agent) would benefit from knowing
+before they hit the same wall:
 
-1. **Reproducible for anyone.** A different person, on a fresh checkout, working
-   in this repo would hit the same friction. It is not specific to your sandbox,
-   shell config, machine, network, or a one-time hiccup.
-2. **Fixable in the repo.** A change to the repo's code, config, scripts, or
-   docs would prevent or reduce it.
+- **A tool call that missed or failed in a confusing way.**
+- **A setup step or config with no obvious reason.**
+- **A command or behavior that was surprising — didn't do what you expected.**
 
-If either answer is "no," push through and move on — do not log it.
+Skip it if it's just your environment or a one-off — your sandbox's failures,
+your own shell mistakes, or transient flakiness (details below).
 
 ## Do NOT log
 
@@ -66,7 +67,7 @@ Only mine a whole session or do a broad review when the user explicitly asks.
 
 When asked to review:
 
-1. Re-run the two-question test on every open entry; delete any that fail it
+1. Re-run the worth-it test on every open entry; delete any that fail it
    (environment/shell/flake noise that slipped in).
 2. Deduplicate and group related entries.
 3. Verify each surviving papercut still reproduces.

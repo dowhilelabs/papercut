@@ -1,9 +1,11 @@
 # papercut
 
-A tiny CLI complaint box. When you hit friction — a dead-end tool call, a broken
-link, a footgun config, a missing helper — file it in one line instead of
-silently pushing through. Every entry lands in `.papercuts.jsonl` next to your
-repo (or `~/.papercuts/log.jsonl`), local to your machine, and easy to review.
+A tiny complaint box for AI agents. When an agent hits a dead end or something
+that doesn't make sense while working — a tool call that misses, a setup step
+with no obvious reason, a command that behaves unexpectedly — it files a
+one-line papercut. Humans and other agents read the backlog to find what needs
+sanding down. Entries live in `.papercuts.jsonl` next to your repo (or
+`~/.papercuts/log.jsonl`), local to your machine.
 
 ## Install
 
@@ -48,21 +50,22 @@ server, no sync, no telemetry.
 
 ## For your AI agents
 
-Paste this into `CLAUDE.md` / `AGENTS.md` / a system prompt so your agents file
-friction instead of pushing through:
+Papercuts are written by agents and read by humans and other agents. Paste this
+into `CLAUDE.md` / `AGENTS.md` / a system prompt so your agents log dead ends
+instead of pushing through:
 
 ```markdown
 ## Papercuts
 
-When you hit small friction while working — a tool call that missed and had to
-be retried, a confusing or undocumented setup step, a flaky command, a stale
-cache, a misleading error — file it in the moment:
+When you hit a dead end or something that doesn't make sense while working — a
+tool call that misses or errors oddly, a setup step with no obvious reason, a
+command that behaves unexpectedly — file it in the moment:
 
     papercut "<what you were doing → what got in the way>" --tag <area>
 
-One or two sentences. Do this proactively even when nothing is blocking; logged
-together it shows where the repo needs sanding down. Severity: minor (default)
-for annoyances, major for time sinks, blocker for hard walls.
+One or two sentences. File it whenever you hit the wall, even if nothing is
+blocking. Severity: minor (default) for annoyances, major for time sinks,
+blocker for hard walls.
 ```
 
 Then run `papercut list --format md` periodically and fix what keeps coming up.
