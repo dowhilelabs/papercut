@@ -1,102 +1,79 @@
 # papercut
 
-A tiny CLI that gives anyone — human or AI agent — a complaint box for a repo.
-When you hit friction (a dead-end tool call, a broken link, a footgun config, a
-missing helper), file it in one line instead of silently pushing through. The
-backlog lives in `.papercuts.jsonl` at your repo root, local to your machine and
-easily reviewed and fixed.
+A tiny CLI complaint box. When you hit friction — a dead-end tool call, a broken
+link, a footgun config, a missing helper — file it in one line instead of
+silently pushing through. Every entry lands in `.papercuts.jsonl` next to your
+repo (or `~/.papercuts/log.jsonl`), local to your machine, and easy to review.
+
+## Install
+
+macOS, Apple silicon:
+
+```bash
+brew tap dowhilelabs/papercut https://github.com/dowhilelabs/papercut
+brew install papercut
+```
+
+(The tap is one-time; the explicit URL matters because Homebrew would otherwise
+look for `homebrew-papercut`.)
 
 ## Quickstart
 
 ```bash
-# 1. Install (macOS, Apple silicon)
-brew tap dowhilelabs/papercut https://github.com/dowhilelabs/papercut
-brew install papercut
-
-# 2. File a papercut — what got in the way + what would have prevented it
-#    (add is the default subcommand; `-m` records the model explicitly)
-papercut "yarn web:test with a root-relative path finds no files; the workspace test cwd is apps/web" --tag tooling
-
-# 3. Review the backlog
+papercut "yarn web:test finds no files — the workspace test cwd is apps/web" --tag tooling
 papercut list
-papercut list --format md   # human digest
 ```
 
-That's it — your first papercut is now recorded in `.papercuts.jsonl`.
-
-## Install
-
-**macOS, Apple silicon.** This repo doubles as a Homebrew tap:
-
-```bash
-brew tap dowhilelabs/papercut https://github.com/dowhilelabs/papercut
-brew install papercut
-```
-
-The explicit URL matters: Homebrew's tap convention looks for `homebrew-papercut`, so the short `brew tap dowhilelabs/papercut` form fails.
-
-Or, from source: `cargo install --path .`
+That's it. File a papercut, review the backlog.
 
 ## Usage
 
 ```bash
-papercut "text"                  # file a papercut (add is the default subcommand)
-papercut -m gpt-5 "text"         # ... with the model recorded explicitly
-papercut add "text"              # explicit subcommand (also: papercut log)
-papercut add -                   # file from stdin (good for long bodies)
-papercut list                    # human-readable digest (ts - model - user + body)
-papercut list --format md        # markdown digest
-papercut list --format json      # machine/agent JSON
-papercut list --all              # include resolved items
-papercut resolve pc_9f2c41d0     # mark one fixed (full or prefix id)
-papercut doctor                  # validate the journal
-papercut schema                  # full machine contract (mainly for agents)
+papercut "text"            # file a papercut (add is the default subcommand)
+papercut -m gpt-5 "text"   # record which model filed it
+papercut list              # review the backlog (newest first, --- separated)
+papercut list --all        # include resolved
+papercut resolve <id>      # mark one fixed
 ```
 
-Each entry records **who** (git identity), **what** (model/harness, when filed
-by an agent), **when** (RFC3339 UTC), plus tags and severity. Everything is
-append-only — `resolve` adds an event, it never rewrites history.
+Each entry records who (git identity), what (model/harness, for agent-filed),
+when (RFC3339 UTC), plus tags and severity. Everything is append-only —
+`resolve` adds an event, it never rewrites history.
 
 ## Where papercuts live
 
-`.papercuts.jsonl` at your repo root (falls back to `~/.papercuts/log.jsonl`
-outside a git repo). It's plain, append-only JSONL — human-readable and local
-to your machine (gitignored, so it stays yours; it doesn't get committed or
-shared). No server, no sync, no telemetry.
+`.papercuts.jsonl` at your repo root, falling back to `~/.papercuts/log.jsonl`
+outside a repo. Plain, append-only JSONL, gitignored so it stays yours. No
+server, no sync, no telemetry.
 
 ## For your AI agents
 
 Paste this into `CLAUDE.md` / `AGENTS.md` / a system prompt so your agents file
-friction instead of silently pushing through:
+friction instead of pushing through:
 
 ```markdown
 ## Papercuts
 
 When you hit small friction while working — a tool call that missed and had to
 be retried, a confusing or undocumented setup step, a flaky command, a stale
-cache, a misleading error, a non-obvious gotcha — file it in the moment:
+cache, a misleading error — file it in the moment:
 
     papercut "<what you were doing → what got in the way>" --tag <area>
 
-One or two sentences: what you were doing → what got in the way (a guess at the
-cause or fix is a bonus). Do this proactively, even though none of it is
-blocking — logged together it shows where the repo needs sanding down. Severity:
-minor (default) for annoyances, major for time sinks, blocker for hard walls.
-
-This is distinct from your task log (what you accomplished) and from real bug
-tracking (reproducible bugs / tracked work).
+One or two sentences. Do this proactively even when nothing is blocking; logged
+together it shows where the repo needs sanding down. Severity: minor (default)
+for annoyances, major for time sinks, blocker for hard walls.
 ```
 
-Then periodically run `papercut list --format md` and fix what keeps coming up.
+Then run `papercut list --format md` periodically and fix what keeps coming up.
 
 ## Details
 
+- **Agents / machines** — `papercut list --format json` emits a data-only JSON
+  envelope (with id, severity, tags); plain `list` is the human digest.
 - **Config** — `PAPERCUTS_FILE` overrides the journal path; `PAPERCUTS_MODEL`,
   `PAPERCUTS_HARNESS`, `PAPERCUTS_USER` override detected identity; `PAPERCUTS_NOW`
-  pins the timestamp (for reproducible tests).
-- **Agents** — use `papercut list --format json` for a data-only JSON envelope;
-  plain `list` is human-readable. Errors go to stderr with stable codes and
-  documented exit codes. `papercut schema` returns the full machine contract.
+  pins the timestamp. `papercut schema` prints the full machine contract.
 - **Concurrency** — safe for multiple agents on one file (locking, atomic
   appends, self-healing torn lines, duplicate suppression).
 
@@ -106,6 +83,8 @@ Then periodically run `papercut list --format md` and fix what keeps coming up.
 cargo build --release
 cargo test
 ```
+
+Source install: `cargo install --path .`
 
 ## License
 
