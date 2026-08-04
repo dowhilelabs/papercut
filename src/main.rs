@@ -192,7 +192,7 @@ fn render_text(cuts: &[&Cut], _resolved: &HashSet<String>) -> String {
     if cuts.is_empty() {
         return "No open papercuts.\n".to_string();
     }
-    let mut out = String::new();
+    let mut entries: Vec<String> = Vec::with_capacity(cuts.len());
     for c in cuts {
         let mut header = format_ts(&c.ts);
         if let Some(m) = &c.model {
@@ -201,9 +201,9 @@ fn render_text(cuts: &[&Cut], _resolved: &HashSet<String>) -> String {
         if let Some(u) = &c.user {
             header.push_str(&format!(" - {u}"));
         }
-        out.push_str(&format!("{header}\n\n{}\n\n", wrap(&c.text, 80)));
+        entries.push(format!("{header}\n\n{}", wrap(&c.text, 80)));
     }
-    out
+    entries.join("\n\n---\n\n") + "\n"
 }
 
 /// Format a stored RFC3339 ts as milliseconds (`2026-07-08T21:13:30.864Z`) to

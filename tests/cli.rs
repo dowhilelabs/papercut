@@ -171,6 +171,19 @@ fn list_default_is_human_readable_text() {
 }
 
 #[test]
+fn list_text_separates_entries_with_delimiter() {
+    let dir = tempdir().unwrap();
+    pc(dir.path()).args(["add", "first one"]).output().unwrap();
+    pc(dir.path()).args(["add", "second one"]).output().unwrap();
+    let out = pc(dir.path()).arg("list").output().unwrap();
+    assert!(out.status.success());
+    let text = String::from_utf8(out.stdout).unwrap();
+    assert!(text.contains("first one"), "text: {text}");
+    assert!(text.contains("second one"), "text: {text}");
+    assert_eq!(text.matches("\n---\n").count(), 1, "one delimiter for two entries: {text}");
+}
+
+#[test]
 fn list_markdown_format() {
     let dir = tempdir().unwrap();
     pc(dir.path()).args(["add", "a doc footgun", "-t", "docs"]).output().unwrap();
