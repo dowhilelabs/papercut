@@ -12,9 +12,11 @@ sanding down. Entries live in `.papercuts.jsonl` next to your repo (or
 macOS, Apple silicon:
 
 ```bash
-brew tap dowhilelabs/tap
-brew install papercut
+brew install dowhilelabs/tap/papercut
 ```
+
+One command — Homebrew adds the tap automatically (and skips the usual
+third-party trust prompt).
 
 ## Quickstart
 
