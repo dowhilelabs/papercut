@@ -15,9 +15,6 @@ macOS, Apple silicon:
 brew install dowhilelabs/tap/papercut
 ```
 
-One command — Homebrew adds the tap automatically (and skips the usual
-third-party trust prompt).
-
 ## Quickstart
 
 ```bash
