@@ -5,7 +5,7 @@ use crate::error::{self, Error};
 use crate::record::Record;
 use fs2::FileExt;
 use std::fs::{File, OpenOptions};
-use std::io::{BufRead, BufReader, Write};
+use std::io::{BufRead, BufReader, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
@@ -90,6 +90,42 @@ impl Store {
         file.write_all(json.as_bytes()).map_err(Error::Io)?;
         file.sync_all().map_err(Error::Io)?;
         Ok(true)
+    }
+
+    /// Permanently delete every record with the given id by rewriting the journal
+    /// without those lines (torn lines are preserved). Returns how many records
+    /// were removed. This is the one intentionally destructive operation — the
+    /// rest of the journal stays append-only.
+    pub fn remove(&self, id: &str) -> Result<usize, Error> {
+        if !self.path.exists() {
+            return Ok(0);
+        }
+        let mut file = OpenOptions::new().read(true).write(true).open(&self.path)?;
+        acquire_lock(&file, &self.path)?;
+
+        let content = std::io::read_to_string(BufReader::new(&file)).map_err(Error::Io)?;
+
+        let mut kept = String::new();
+        let mut removed = 0usize;
+        for line in content.lines() {
+            let trimmed = line.trim();
+            let drop = !trimmed.is_empty()
+                && matches!(serde_json::from_str::<Record>(trimmed), Ok(rec) if rec.id() == id);
+            if drop {
+                removed += 1;
+            } else {
+                kept.push_str(line);
+                kept.push('\n');
+            }
+        }
+
+        if removed > 0 {
+            file.set_len(0).map_err(Error::Io)?;
+            file.seek(SeekFrom::Start(0)).map_err(Error::Io)?;
+            file.write_all(kept.as_bytes()).map_err(Error::Io)?;
+            file.sync_all().map_err(Error::Io)?;
+        }
+        Ok(removed)
     }
 }
 
@@ -198,5 +234,29 @@ mod tests {
         let s = store_in(dir.path());
         let res = s.read().unwrap();
         assert!(res.records.is_empty());
+    }
+
+    #[test]
+    fn remove_drops_matching_records_only() {
+        let dir = tempfile::tempdir().unwrap();
+        let s = store_in(dir.path());
+        s.append(&cut("pc_a", "one")).unwrap();
+        s.append(&cut("pc_b", "two")).unwrap();
+        s.append(&crate::record::Record::Resolved(crate::record::Resolved {
+            id: "pc_a".into(),
+            ts: "2026-01-01T00:00:00.000Z".into(),
+            by: None,
+            note: None,
+        }))
+        .unwrap();
+
+        // Removing pc_a also removes its resolution event, not pc_b.
+        assert_eq!(s.remove("pc_a").unwrap(), 2);
+        let res = s.read().unwrap();
+        assert_eq!(res.records.len(), 1);
+        assert_eq!(res.records[0].id(), "pc_b");
+
+        // Missing id is a no-op.
+        assert_eq!(s.remove("pc_missing").unwrap(), 0);
     }
 }

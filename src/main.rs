@@ -38,7 +38,7 @@ fn implicit_add_args() -> Vec<OsString> {
     }
     let first = args[1].to_str().unwrap_or("");
     const KNOWN: &[&str] = &[
-        "add", "list", "resolve", "schema", "doctor", "log", "help",
+        "add", "list", "resolve", "delete", "schema", "doctor", "log", "help",
         "-h", "--help", "-V", "--version",
     ];
     if !KNOWN.contains(&first) {
@@ -52,6 +52,7 @@ fn dispatch(cmd: Command) -> Result<i32, Error> {
         Command::Add(a) => cmd_add(a),
         Command::List(a) => cmd_list(a),
         Command::Resolve(a) => cmd_resolve(a),
+        Command::Delete(a) => cmd_delete(a),
         Command::Schema => cmd_schema(),
         Command::Doctor => cmd_doctor(),
     }
@@ -306,6 +307,50 @@ fn cmd_resolve(a: cli::ResolveArgs) -> Result<i32, Error> {
         id: String,
     }
     output::print_envelope(ResolveData { changed, id: target_id }, &file);
+    Ok(0)
+}
+
+fn cmd_delete(a: cli::DeleteArgs) -> Result<i32, Error> {
+    let s = store::Store::resolve()?;
+    let file = s.path.display().to_string();
+
+    // Unique complaint-id match, same prefix rules as resolve.
+    let res = s.read()?;
+    let mut seen: HashSet<&str> = HashSet::new();
+    let mut matched: Vec<String> = Vec::new();
+    for r in &res.records {
+        if (r.id() == a.id || r.id().starts_with(&a.id)) && seen.insert(r.id()) {
+            matched.push(r.id().to_string());
+        }
+    }
+    if matched.is_empty() {
+        return Err(error::not_found(a.id));
+    }
+    if matched.len() > 1 {
+        return Err(error::bad_input(format!(
+            "id '{}' is ambiguous; matches {} records. Use a longer prefix or the full id.",
+            a.id,
+            matched.len()
+        )));
+    }
+    let target_id = matched[0].clone();
+
+    let removed = s.remove(&target_id)?;
+
+    #[derive(serde::Serialize)]
+    struct DeleteData {
+        changed: bool,
+        id: String,
+        removed: usize,
+    }
+    output::print_envelope(
+        DeleteData {
+            changed: removed > 0,
+            id: target_id,
+            removed,
+        },
+        &file,
+    );
     Ok(0)
 }
 

@@ -32,6 +32,9 @@ pub enum Command {
     List(ListArgs),
     /// Mark a papercut fixed (appends a resolved event; never rewrites history).
     Resolve(ResolveArgs),
+    /// Permanently remove a papercut (and any resolution) from the journal by
+    /// rewriting the file. Use for noise that shouldn't be in the backlog at all.
+    Delete(DeleteArgs),
     /// Print the machine contract (commands, env vars, shapes, exit codes).
     Schema,
     /// Validate the journal file and report issues.
@@ -69,4 +72,11 @@ pub struct ResolveArgs {
     /// Optional note about how it was fixed.
     #[arg(long)]
     pub note: Option<String>,
+}
+
+#[derive(Args)]
+pub struct DeleteArgs {
+    /// Full or unique-prefix record id, e.g. `pc_9f2c41d0a8`.
+    #[arg(value_name = "ID")]
+    pub id: String,
 }

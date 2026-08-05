@@ -14,7 +14,7 @@ pub fn contract() -> Value {
             "env_override": "PAPERCUTS_FILE",
             "outside_git": "~/.papercuts/log.jsonl",
             "format": "append-only JSONL, one record per line",
-            "history": "append-only journal; resolve appends an event, never rewrites"
+            "history": "append-only journal; resolve appends an event; delete rewrites to remove a papercut entirely"
         },
         "env": {
             "PAPERCUTS_FILE": { "read": true, "write": false, "desc": "Override journal path" },
@@ -44,6 +44,12 @@ pub fn contract() -> Value {
             "resolve": {
                 "write": true,
                 "args": { "id": "full or unique-prefix id", "--note": "how it was fixed" }
+            },
+            "delete": {
+                "write": true,
+                "destructive": true,
+                "args": { "id": "full or unique-prefix id" },
+                "exit": { "0": "removed", "no-op": "id already absent" }
             },
             "schema": { "read": true, "desc": "this contract" },
             "doctor": { "read": true, "desc": "validate the journal" }

@@ -267,3 +267,46 @@ fn doctor_reports_ok_on_clean_journal() {
     assert_eq!(v["data"]["open"], 1);
     assert_eq!(v["data"]["torn"], 0);
 }
+
+#[test]
+fn delete_removes_cut_and_resolution() {
+    let dir = tempdir().unwrap();
+    // Add a noise papercut, then resolve it (so there are two records for the id).
+    let add = pc(dir.path()).args(["add", "pure environment noise"]).output().unwrap();
+    assert!(add.status.success());
+    let add_v = json_of(&String::from_utf8(add.stdout).unwrap());
+    let id = add_v["data"]["record"]["id"].as_str().unwrap().to_string();
+    pc(dir.path()).args(["resolve", &id]).output().unwrap();
+
+    let out = pc(dir.path()).args(["delete", &id]).output().unwrap();
+    assert!(out.status.success());
+    let v = json_of(&String::from_utf8(out.stdout).unwrap());
+    assert_eq!(v["ok"], true);
+    assert_eq!(v["data"]["changed"], true);
+    assert_eq!(v["data"]["id"], id);
+    assert_eq!(v["data"]["removed"], 2); // the cut + its resolution
+
+    // Both records are gone from the file.
+    let file = fs::read_to_string(dir.path().join("log.jsonl")).unwrap();
+    assert_eq!(file.trim().lines().count(), 0);
+}
+
+#[test]
+fn delete_uses_prefix_matching() {
+    let dir = tempdir().unwrap();
+    pc(dir.path()).args(["add", "flake"]).output().unwrap();
+    let out = pc(dir.path()).args(["delete", "pc_"]).output().unwrap();
+    assert!(out.status.success());
+    let v = json_of(&String::from_utf8(out.stdout).unwrap());
+    assert_eq!(v["data"]["changed"], true);
+    let file = fs::read_to_string(dir.path().join("log.jsonl")).unwrap();
+    assert_eq!(file.trim().lines().count(), 0);
+}
+
+#[test]
+fn delete_missing_id_errors_not_found() {
+    let dir = tempdir().unwrap();
+    let out = pc(dir.path()).args(["delete", "pc_00000000"]).output().unwrap();
+    assert!(!out.status.success());
+    assert_eq!(out.status.code(), Some(66)); // E_NOT_FOUND
+}
