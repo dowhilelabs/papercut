@@ -75,13 +75,19 @@ fn cmd_add(a: cli::AddArgs) -> Result<i32, Error> {
     }
 
     let ctx = context::resolve(a.model.as_deref(), a.user.as_deref());
+    let model = ctx.model.ok_or_else(|| {
+        error::bad_input(
+            "could not determine the model. Pass `-m <model>` (or set PAPERCUTS_MODEL) \
+so the record says what filed it.",
+        )
+    })?;
     let id = make_cut_id(text.trim());
     let ts = now_ts()?;
 
     let cut = Cut {
         id,
         ts,
-        model: ctx.model,
+        model,
         user: ctx.user,
         text: text.trim().to_string(),
     };
@@ -182,10 +188,7 @@ fn render_text(cuts: &[&Cut], _resolved: &HashSet<String>) -> String {
     }
     let mut entries: Vec<String> = Vec::with_capacity(cuts.len());
     for c in cuts {
-        let mut header = format_ts(&c.ts);
-        if let Some(m) = &c.model {
-            header.push_str(&format!(" - {m}"));
-        }
+        let mut header = format!("{} - {}", format_ts(&c.ts), c.model);
         if let Some(u) = &c.user {
             header.push_str(&format!(" - {u}"));
         }
@@ -238,7 +241,7 @@ fn render_markdown(cuts: &[&Cut], resolved: &HashSet<String>) -> String {
     out.push_str(&format!("## Open ({})\n\n", cuts.len()));
     for c in cuts {
         let user = c.user.as_deref().unwrap_or("");
-        let model = c.model.as_deref().unwrap_or("");
+        let model = &c.model;
         let resolved_mark = if resolved.contains(&c.id) {
             "[x]"
         } else {

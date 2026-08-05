@@ -4,15 +4,33 @@
 //! records that a complaint was fixed. The log is an append-only journal —
 //! nothing is ever rewritten or deleted.
 
+use serde::de::Deserializer;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+
+/// Fallback model used only when reading legacy records that had `model: null`.
+/// New records always carry a real model (add refuses to file one without it).
+const UNKNOWN_MODEL: &str = "unknown";
+
+fn default_model() -> String {
+    UNKNOWN_MODEL.to_string()
+}
+
+/// Accepts `null`, a missing field, or a string; null/missing become "unknown".
+fn de_model<'de, D>(d: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<String>::deserialize(d)?.unwrap_or_else(|| UNKNOWN_MODEL.to_string()))
+}
 
 /// A single papercut complaint.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Cut {
     pub id: String,
     pub ts: String,
-    pub model: Option<String>,
+    #[serde(default = "default_model", deserialize_with = "de_model")]
+    pub model: String,
     pub user: Option<String>,
     pub text: String,
 }

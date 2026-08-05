@@ -59,7 +59,7 @@ pub fn contract() -> Value {
                 "kind": "cut",
                 "id": "pc_<sha256-hex-10> content-addressed",
                 "ts": "RFC3339 UTC, PAPERCUTS_NOW override",
-                "model": "string|null, detected/override",
+                "model": "string (required), detected/override; add errors if undeterminable",
                 "user": "string|null, git config or env",
                 "text": "string, unbounded"
             },

@@ -310,3 +310,42 @@ fn delete_missing_id_errors_not_found() {
     assert!(!out.status.success());
     assert_eq!(out.status.code(), Some(66)); // E_NOT_FOUND
 }
+
+#[test]
+fn add_errors_when_model_cannot_be_resolved() {
+    let dir = tempdir().unwrap();
+    let out = pc(dir.path())
+        .env_remove("PAPERCUTS_MODEL")
+        .args(["add", "some dead end"])
+        .output()
+        .unwrap();
+    assert!(!out.status.success());
+    assert_eq!(out.status.code(), Some(65)); // E_BAD_INPUT
+    let err = String::from_utf8(out.stderr).unwrap();
+    assert!(
+        err.to_lowercase().contains("model"),
+        "error should mention model: {err}"
+    );
+    assert!(
+        err.contains("-m"),
+        "error should point at -m/--model: {err}"
+    );
+    // Nothing was appended (the journal is never even created).
+    assert!(
+        !dir.path().join("log.jsonl").exists(),
+        "errored add should not create the journal"
+    );
+}
+
+#[test]
+fn add_via_cli_flag_model_when_env_absent() {
+    let dir = tempdir().unwrap();
+    let out = pc(dir.path())
+        .env_remove("PAPERCUTS_MODEL")
+        .args(["-m", "gpt-5", "a dead end with explicit model"])
+        .output()
+        .unwrap();
+    assert!(out.status.success());
+    let v = json_of(&String::from_utf8(out.stdout).unwrap());
+    assert_eq!(v["data"]["record"]["model"], "gpt-5");
+}
