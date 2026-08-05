@@ -12,12 +12,9 @@ sanding down. Entries live in `.papercuts.jsonl` next to your repo (or
 macOS, Apple silicon:
 
 ```bash
-brew tap dowhilelabs/papercut https://github.com/dowhilelabs/papercut
+brew tap dowhilelabs/tap
 brew install papercut
 ```
-
-(The tap is one-time; the explicit URL matters because Homebrew would otherwise
-look for `homebrew-papercut`.)
 
 ## Quickstart
 
