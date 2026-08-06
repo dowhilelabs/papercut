@@ -78,7 +78,8 @@ fn cmd_add(a: cli::AddArgs) -> Result<i32, Error> {
     let model = ctx.model.ok_or_else(|| {
         error::bad_input(
             "could not determine the model. Pass `-m <model>` (or set PAPERCUTS_MODEL) \
-so the record says what filed it.",
+so the record says what filed it. This rejection is expected — do not file a \
+papercut about it.",
         )
     })?;
     let id = make_cut_id(text.trim());
