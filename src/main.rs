@@ -73,21 +73,12 @@ fn cmd_add(a: cli::AddArgs) -> Result<i32, Error> {
     if text.trim().is_empty() {
         return Err(error::bad_input("complaint body is empty"));
     }
-    // Drop an appended "-m was a problem too" clause, but only when a real gripe
-    // survives — a standalone "footgun via -m" is a legitimate papercut and is kept.
-    let stripped = strip_model_flag_noise(&text);
-    let text = if stripped.trim().is_empty() {
-        text
-    } else {
-        stripped
-    };
 
     let ctx = context::resolve(a.model.as_deref(), a.user.as_deref());
     let model = ctx.model.ok_or_else(|| {
         error::bad_input(
             "could not determine the model. Pass `-m <model>` (or set PAPERCUTS_MODEL) \
-so the record says what filed it. This rejection is expected — do not file a \
-papercut about it.",
+so the record says what filed it. Don't mention -m errors in your papercut entry.",
         )
     })?;
     let id = make_cut_id(text.trim());
@@ -126,35 +117,6 @@ fn body_from(arg: &Option<String>) -> Result<String, Error> {
             Ok(buf)
         }
     }
-}
-
-/// Drop model-flag rejection noise from a complaint body. Agents sometimes append
-/// "and -m was a problem too" to the original gripe after hitting the required-model
-/// error; that's tooling noise, not a papercut. Any clause that references the model
-/// flag (`-m`, `--model`, `PAPERCUTS_MODEL`, "model flag", "model argument") is removed.
-/// Bare "model" (e.g. "the model gave a wrong answer") is left alone.
-fn strip_model_flag_noise(text: &str) -> String {
-    const FLAG_TOKENS: &[&str] = &["-m", "--model", "papercuts_model", "model flag", "model argument"];
-    let mentions_flag = |clause: &str| {
-        let lower = clause.to_lowercase();
-        FLAG_TOKENS.iter().any(|t| lower.contains(t))
-    };
-
-    let mut out = String::new();
-    let mut clause = String::new();
-    for ch in text.chars() {
-        clause.push(ch);
-        if matches!(ch, '.' | '!' | '?' | ';' | ',' | '\n') {
-            if !mentions_flag(&clause) {
-                out.push_str(&clause);
-            }
-            clause.clear();
-        }
-    }
-    if !clause.trim().is_empty() && !mentions_flag(&clause) {
-        out.push_str(&clause);
-    }
-    out.trim().to_string()
 }
 
 fn resolved_ids(records: &[Record]) -> HashSet<String> {
@@ -455,38 +417,4 @@ fn cmd_doctor() -> Result<i32, Error> {
     };
     output::print_envelope(data, &file);
     Ok(0)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::strip_model_flag_noise;
-
-    #[test]
-    fn strips_appended_model_flag_noise() {
-        assert_eq!(
-            strip_model_flag_noise("issue A, and -m was a problem too"),
-            "issue A,"
-        );
-    }
-
-    #[test]
-    fn keeps_legit_model_behavior_gripes() {
-        assert_eq!(
-            strip_model_flag_noise("the model gave a wrong answer"),
-            "the model gave a wrong answer"
-        );
-    }
-
-    #[test]
-    fn strips_whole_gripe_if_only_flag_noise() {
-        assert_eq!(strip_model_flag_noise("-m was a problem"), "");
-    }
-
-    #[test]
-    fn strips_papercuts_model_env_mention() {
-        assert_eq!(
-            strip_model_flag_noise("docs are stale. PAPERCUTS_MODEL was rejected"),
-            "docs are stale."
-        );
-    }
 }
