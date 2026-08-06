@@ -349,3 +349,19 @@ fn add_via_cli_flag_model_when_env_absent() {
     let v = json_of(&String::from_utf8(out.stdout).unwrap());
     assert_eq!(v["data"]["record"]["model"], "gpt-5");
 }
+
+#[test]
+fn add_strips_model_flag_noise_from_gripe() {
+    let dir = tempdir().unwrap();
+    let out = pc(dir.path())
+        .arg("add")
+        .arg("-")
+        .write_stdin("issue A, and -m was a problem too")
+        .output()
+        .unwrap();
+    assert!(out.status.success());
+    let v = json_of(&String::from_utf8(out.stdout).unwrap());
+    let text = v["data"]["record"]["text"].as_str().unwrap();
+    assert!(!text.contains("-m"), "should strip -m noise: {text}");
+    assert!(text.contains("issue A"), "should keep the gripe: {text}");
+}
